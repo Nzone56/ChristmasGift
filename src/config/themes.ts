@@ -89,21 +89,35 @@ export const themes: Record<string, GameTheme> = {
     font: "'Alegreya', serif",
     textTransform: "uppercase",
     colors: {
-      primary: "#744979",
-      secondary: "#e0a40b",
-      accent: "#b84028",
-      background: "#2d1b2e",
+      // Infernal crimson
+      primary: "#8c1d18",
+
+      // Aged gold (not shiny)
+      secondary: "#c9a24d",
+
+      // Hellfire / arcane ember
+      accent: "#e05a2a",
+
+      // Obsidian background
+      background: "#120a0a",
+
       backgroundGradient:
-        "linear-gradient(135deg, #2d1b2e 0%, #744979 50%, #d0a1d3 100%)",
-      text: "#f0d794",
-      textSecondary: "#d0a1d3",
-      cardBg: "#3d2940",
-      cardBgGradient: "linear-gradient(135deg, #3d2940 0%, #744979 100%)",
+        "linear-gradient(135deg, #120a0a 0%, #2a0f0f 40%, #3b1412 70%, #1a0a08 100%)",
+
+      // Parchment-like text
+      text: "#f2e6c9",
+      textSecondary: "#c9a24d",
+
+      // Dark ritual card background
+      cardBg: "#1e0d0b",
+
+      cardBgGradient:
+        "linear-gradient(135deg, #1e0d0b 0%, #2f1411 50%, #3b1412 100%)",
     },
     audio: "/audio/down-by-the-river.mp3",
     couponData: {
       name: "Baldur's Gate 3",
-      description: "Undoubtedly the GOTC",
+      description: "ABSOLUTE CINEMA. Undoubtedly the GOTC.",
       instructions: [
         "📜 This coupon grants the bearer the sacred and unquestionable right to claim one (1) copy of Baldur's Gate 3 for PS5 🎮✨",
         "⏳ This coupon is valid for 3 months from the date of issue",
@@ -113,7 +127,7 @@ export const themes: Record<string, GameTheme> = {
         "💸 No cash value",
         "🥲🍽️ Void if lost, eaten, or if it suffers emotional damage",
       ],
-      image: "/images/baldursgate3.jpg",
+      image: "/images/bg3-coupon.png",
       logo: "/images/bg3-logo.png",
     },
   },
