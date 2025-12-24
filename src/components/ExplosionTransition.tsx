@@ -14,131 +14,207 @@ export default function ExplosionTransition({
   const giftRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
+  const spiralRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (
       !containerRef.current ||
       !giftRef.current ||
       !particlesRef.current ||
-      !glowRef.current
+      !glowRef.current ||
+      !spiralRef.current ||
+      !overlayRef.current
     )
       return;
 
     const tl = gsap.timeline({
       onComplete: () => {
-        console.log("Explosion animation complete");
         onComplete();
       },
     });
 
-    // ===== PHASE 1: BUILDUP (1.2s) =====
-    // Dramatic scaling with anticipation
-    tl.to(giftRef.current, {
-      scale: 20,
-      duration: 1.2,
-      ease: "power2.in",
-    });
-
-    // Glow builds up
-    tl.to(
-      glowRef.current,
-      {
-        opacity: 0.6,
-        scale: 2,
-        duration: 1.2,
-        ease: "power2.in",
-      },
-      0
-    );
-
-    // ===== PHASE 2: EXPLOSION (1.0s) =====
-    // Clear, visible explosion burst
+    // ===== PHASE 1: BUILDUP (1.5s) =====
+    // Clean, focused buildup - only the gift scales
     tl.to(
       giftRef.current,
       {
-        scale: 40,
+        scale: 18,
+        duration: 1.5,
+        ease: "power2.in",
+      },
+      "buildup"
+    );
+
+    // Subtle glow builds behind gift
+    tl.to(
+      glowRef.current,
+      {
+        opacity: 0.5,
+        scale: 2.5,
+        duration: 1.5,
+        ease: "power2.in",
+      },
+      "buildup"
+    );
+
+    // ===== PHASE 2: EXPLOSION (1.2s) =====
+    // Gift bursts with blur
+    tl.to(
+      giftRef.current,
+      {
+        scale: 35,
         opacity: 0,
-        filter: "blur(50px)",
-        duration: 0.5,
+        filter: "blur(60px)",
+        duration: 0.6,
         ease: "power3.out",
       },
-      "explosion"
+      "explode"
     );
 
     // Glow explodes outward
     tl.to(
       glowRef.current,
       {
-        scale: 8,
+        scale: 10,
         opacity: 0,
-        duration: 0.6,
+        duration: 0.7,
         ease: "power2.out",
       },
-      "explosion"
+      "explode"
     );
 
-    // Particles burst outward - CLEARLY VISIBLE
+    // White flash at explosion moment
+    tl.fromTo(
+      overlayRef.current,
+      { opacity: 0 },
+      {
+        opacity: 0.95,
+        duration: 0.1,
+        ease: "power2.out",
+      },
+      "explode"
+    );
+
+    // Flash fades quickly
+    tl.to(
+      overlayRef.current,
+      {
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+      },
+      "explode+=0.1"
+    );
+
+    // Make particles container visible at explosion moment
+    tl.set(particlesRef.current, { opacity: 1 }, "explode");
+
+    // Particles appear and burst outward - ONLY during explosion
     const particles = particlesRef.current.children;
+    tl.fromTo(
+      particles,
+      {
+        opacity: 0,
+        scale: 0,
+      },
+      {
+        opacity: 1,
+        scale: 2.5,
+        x: (i) => Math.cos((i / particles.length) * Math.PI * 2) * 350,
+        y: (i) => Math.sin((i / particles.length) * Math.PI * 2) * 350,
+        rotation: (i) => i * 90,
+        duration: 1.4,
+        ease: "power1.out",
+        stagger: 0.025,
+      },
+      "explode+=0.05"
+    );
+
+    // Particles fade out - slower and later
     tl.to(
       particles,
       {
-        scale: 3.5,
         opacity: 0,
-        x: (i) => Math.cos((i / particles.length) * Math.PI * 2) * 600,
-        y: (i) => Math.sin((i / particles.length) * Math.PI * 2) * 600,
-        rotation: (i) => i * 90,
-        duration: 1.0,
-        ease: "power2.out",
-        stagger: 0.02,
+        scale: 1.5,
+        duration: 0.7,
+        ease: "power1.in",
       },
-      "explosion+=0.1"
+      "explode+=1.0"
     );
 
-    // Multiple flash effects for impact
-    tl.to(
-      containerRef.current,
+    // Make spiral container visible at explosion moment
+    tl.set(spiralRef.current, { opacity: 1 }, "explode");
+
+    // Icon spiral effect - appears during explosion
+    const spiralIcons = spiralRef.current.children;
+    tl.fromTo(
+      spiralIcons,
       {
-        backgroundColor: "rgba(255, 255, 255, 0.9)",
-        duration: 0.15,
-        ease: "power2.inOut",
-        yoyo: true,
-        repeat: 2,
+        opacity: 0,
+        scale: 0,
+        rotation: 0,
       },
-      "explosion"
+      {
+        opacity: 0.9,
+        scale: (i) => 1.8 - i * 0.1,
+        x: (i) =>
+          Math.cos((i / spiralIcons.length) * Math.PI * 4) * (180 + i * 25),
+        y: (i) =>
+          Math.sin((i / spiralIcons.length) * Math.PI * 4) * (180 + i * 25),
+        rotation: (i) => i * 50,
+        duration: 1.2,
+        ease: "power1.out",
+        stagger: 0.04,
+      },
+      "explode+=0.1"
     );
 
-    // ===== PHASE 3: POST-EXPLOSION TRANSITION (0.8s) =====
-    // Apply theme change before fade-out starts
+    // Spiral fades out - slower
+    tl.to(
+      spiralIcons,
+      {
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.6,
+        ease: "power1.in",
+      },
+      "explode+=0.9"
+    );
+
+    // ===== PHASE 3: REVEAL (1.0s) =====
+    // Apply theme change during the calm after explosion
     tl.call(
       () => {
-        console.log("Applying theme change before fade-out...");
         if (onBeforeFadeOut) {
           onBeforeFadeOut();
         }
       },
       [],
-      "+=0.2"
+      "reveal"
     );
 
-    // Smooth fade to reveal theme (theme already applied)
+    // Smooth fade out of entire explosion container to reveal new theme
     tl.to(
       containerRef.current,
       {
         opacity: 0,
-        duration: 0.8,
+        duration: 1.0,
         ease: "power2.inOut",
       },
-      "+=0.3"
+      "reveal+=0.2"
     );
 
     return () => {
       tl.kill();
     };
-  }, [onComplete]);
+  }, [onComplete, onBeforeFadeOut]);
 
-  // Create particle elements
-  const particleCount = 20;
+  // Create particle and spiral elements
+  const particleCount = 30;
+  const spiralCount = 15;
   const particleEmojis = ["✨", "⭐", "🎁", "🎄", "❄️", "🎉"];
+  const spiralEmojis = ["🎮", "🎯", "🎪", "🎨"];
 
   return (
     <div
@@ -149,13 +225,23 @@ export default function ExplosionTransition({
         pointerEvents: "none",
       }}
     >
+      {/* White flash overlay */}
+      <div
+        ref={overlayRef}
+        className="absolute inset-0"
+        style={{
+          backgroundColor: "rgba(255, 255, 255, 1)",
+          opacity: 0,
+        }}
+      />
+
       {/* Glow effect behind gift */}
       <div
         ref={glowRef}
         className="absolute w-64 h-64 rounded-full"
         style={{
           background:
-            "radial-gradient(circle, rgba(255, 215, 0, 0.8) 0%, rgba(255, 215, 0, 0) 70%)",
+            "radial-gradient(circle, rgba(255, 215, 0, 0.9) 0%, rgba(255, 215, 0, 0) 70%)",
           opacity: 0,
         }}
       />
@@ -172,8 +258,12 @@ export default function ExplosionTransition({
         🎁
       </div>
 
-      {/* Particles container */}
-      <div ref={particlesRef} className="absolute">
+      {/* Particles container - HIDDEN until explosion */}
+      <div
+        ref={particlesRef}
+        className="absolute"
+        style={{ opacity: 0, zIndex: 10 }}
+      >
         {Array.from({ length: particleCount }).map((_, i) => (
           <div
             key={i}
@@ -182,9 +272,34 @@ export default function ExplosionTransition({
               left: "50%",
               top: "50%",
               transform: "translate(-50%, -50%)",
+              willChange: "transform, opacity",
+              filter: "drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))",
             }}
           >
             {particleEmojis[i % particleEmojis.length]}
+          </div>
+        ))}
+      </div>
+
+      {/* Spiral icons container - HIDDEN until explosion */}
+      <div
+        ref={spiralRef}
+        className="absolute"
+        style={{ opacity: 0, zIndex: 15 }}
+      >
+        {Array.from({ length: spiralCount }).map((_, i) => (
+          <div
+            key={i}
+            className="absolute text-6xl"
+            style={{
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              willChange: "transform, opacity",
+              filter: "drop-shadow(0 0 10px rgba(255, 215, 0, 0.7))",
+            }}
+          >
+            {spiralEmojis[i % spiralEmojis.length]}
           </div>
         ))}
       </div>

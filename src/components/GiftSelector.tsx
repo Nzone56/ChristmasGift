@@ -17,41 +17,40 @@ export default function GiftSelector() {
     useTheme();
   const [showIntro, setShowIntro] = useState(true);
   const [activeTab, setActiveTab] = useState<number | null>(null);
-  const [isVisible, setIsVisible] = useState(true);
   const [showExplosion, setShowExplosion] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const hasAnimated = useRef(false);
   const hasPlayedExplosion = useRef(false);
 
   const handleIntroComplete = () => {
-    console.log("Starting Christmas music on View Gift click...");
     // Start Christmas music immediately on user interaction
     startChristmasMusic();
 
     // Hide intro screen to reveal the neutral Christmas view underneath
     setShowIntro(false);
+
+    // Animate in neutral view elements after intro hides
+    setTimeout(() => {
+      if (hasAnimated.current) return;
+      hasAnimated.current = true;
+
+      const elements =
+        containerRef.current?.querySelectorAll(".animate-on-mount");
+      if (elements) {
+        gsap.fromTo(
+          elements,
+          { opacity: 0, y: 30 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.15,
+            ease: "power2.out",
+          }
+        );
+      }
+    }, 100);
   };
-
-  useEffect(() => {
-    if (!isVisible || hasAnimated.current) return;
-    hasAnimated.current = true;
-
-    const elements =
-      containerRef.current?.querySelectorAll(".animate-on-mount");
-    if (elements) {
-      gsap.fromTo(
-        elements,
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          stagger: 0.15,
-          ease: "power2.out",
-        }
-      );
-    }
-  }, [isVisible]);
 
   const handleTabChange = (tab: number) => {
     if (tab === activeTab) return;
@@ -112,19 +111,25 @@ export default function GiftSelector() {
   };
 
   const handleExplosionComplete = () => {
-    console.log("Explosion complete, revealing theme...");
     setShowExplosion(false);
 
-    // Animate in content with smooth transitions
-    setTimeout(() => {
+    // Immediately animate in content as explosion fades - continuous flow
+    requestAnimationFrame(() => {
       const nextCoupon = containerRef.current?.querySelector(
         `#coupon-${activeTab}`
       );
       if (nextCoupon) {
         gsap.fromTo(
           nextCoupon,
-          { opacity: 0, scale: 0.95, y: 30 },
-          { opacity: 1, scale: 1, y: 0, duration: 1.0, ease: "power2.out" }
+          { opacity: 0, scale: 0.9, y: 40 },
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 1.2,
+            ease: "power2.out",
+            delay: 0.1,
+          }
         );
       }
 
@@ -133,17 +138,18 @@ export default function GiftSelector() {
       if (header && subtitle) {
         gsap.fromTo(
           [header, subtitle],
-          { opacity: 0, y: -15 },
+          { opacity: 0, y: -20 },
           {
             opacity: 1,
             y: 0,
-            duration: 0.8,
+            duration: 1.0,
             ease: "power2.out",
-            stagger: 0.15,
+            stagger: 0.2,
+            delay: 0.2,
           }
         );
       }
-    }, 300);
+    });
   };
 
   const coupon1 = themes.expedition33.couponData;
@@ -152,10 +158,15 @@ export default function GiftSelector() {
   return (
     <>
       {/* Neutral Christmas view - always rendered underneath */}
-      <div ref={containerRef} className="max-w-md mx-auto py-6 px-4">
+      <div
+        ref={containerRef}
+        className="max-w-md mx-auto py-6 px-4"
+        style={{ opacity: showIntro ? 0 : 1 }}
+      >
         <h2
-          className="text-3xl md:text-4xl font-bold text-center mb-2 animate-on-mount opacity-0 theme-transition"
+          className="text-3xl md:text-4xl font-bold text-center mb-2 animate-on-mount theme-transition"
           style={{
+            opacity: 0,
             color: "var(--theme-text)",
             textTransform: "var(--text-transform)",
           }}
@@ -165,8 +176,9 @@ export default function GiftSelector() {
             : currentTheme.couponData.name}
         </h2>
         <p
-          className="text-center mb-8 animate-on-mount opacity-0 theme-transition"
+          className="text-center mb-8 animate-on-mount theme-transition"
           style={{
+            opacity: 0,
             color: "var(--theme-text-secondary)",
             textTransform: "var(--text-transform)",
           }}
@@ -174,14 +186,20 @@ export default function GiftSelector() {
           {activeTab === null ? "" : currentTheme.couponData.description}
         </p>
 
-        <div className="mb-8 animate-on-mount opacity-0">
+        <div className="mb-8 animate-on-mount" style={{ opacity: 0 }}>
           <TabSelector
             activeTab={activeTab}
             onTabChange={handleTabChange}
-            tab1Label={activeTab === null ? "Coupon 1" : gameThemes[0].name}
-            tab2Label={activeTab === null ? "Coupon 2" : gameThemes[1].name}
+            tab1Label={
+              activeTab === null ? "Mysterious Coupon #1" : gameThemes[0].name
+            }
+            tab2Label={
+              activeTab === null ? "Mysterious Coupon #2" : gameThemes[1].name
+            }
           />
+        </div>
 
+        <div>
           <div className="relative min-h-[500px]">
             {activeTab === null && (
               <div className="flex items-center justify-center h-[500px]">
@@ -203,12 +221,14 @@ export default function GiftSelector() {
             <div
               id="coupon-1"
               className={`${activeTab === 1 ? "block" : "hidden"}`}
+              style={{ opacity: 0 }}
             >
               <CouponCard {...coupon1} />
             </div>
             <div
               id="coupon-2"
               className={`${activeTab === 2 ? "block" : "hidden"}`}
+              style={{ opacity: 0 }}
             >
               <CouponCard {...coupon2} />
             </div>
@@ -217,8 +237,11 @@ export default function GiftSelector() {
 
         {activeTab !== null && (
           <div
-            className="text-center text-sm animate-on-mount opacity-0 theme-transition"
-            style={{ color: "var(--theme-text-secondary)", opacity: 0.8 }}
+            className="text-center text-sm animate-on-mount theme-transition"
+            style={{
+              color: "var(--theme-text-secondary)",
+              opacity: 0,
+            }}
           >
             <p>🎮 Happy Gaming! 🎮</p>
           </div>

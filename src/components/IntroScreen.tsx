@@ -53,7 +53,7 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
     >
       <div ref={contentRef} className="text-center px-6 max-w-lg">
         {/* Christmas decorations */}
-        <div className="text-6xl mb-6 opacity-0">🎄✨🎁✨🎄</div>
+        <div className="text-6xl mb-6 opacity-0">🎄✨🎁</div>
 
         {/* Main title */}
         <h1
