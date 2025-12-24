@@ -1,0 +1,45 @@
+---
+import Layout from '../layouts/Layout.astro';
+import App from '../components/App';
+---
+
+<Layout title="Christmas Gift 🎁">
+	<App client:only="react" />
+</Layout>
+
+<style is:global>
+	.coupon-wrapper {
+		perspective: 1000px;
+	}
+
+	.coupon-card {
+		cursor: pointer;
+		height: 400px;
+		position: relative;
+	}
+
+	.coupon-inner {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		transition: transform 0.6s;
+		transform-style: preserve-3d;
+	}
+
+	.coupon-card.flipped .coupon-inner {
+		transform: rotateY(180deg);
+	}
+
+	.coupon-front,
+	.coupon-back {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		backface-visibility: hidden;
+		-webkit-backface-visibility: hidden;
+	}
+
+	.coupon-back {
+		transform: rotateY(180deg);
+	}
+</style>
