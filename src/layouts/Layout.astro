@@ -18,7 +18,7 @@ const { title } = Astro.props;
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body class="bg-gradient-to-br from-christmas-red via-red-900 to-christmas-green min-h-screen overflow-x-hidden">
+	<body class="min-h-screen overflow-x-hidden theme-transition" style="background: var(--theme-background);">
 		<slot />
 	</body>
 </html>
